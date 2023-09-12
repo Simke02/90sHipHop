@@ -1,0 +1,17 @@
+[
+    {  
+        "question": "What year did 2Pac died?",
+        "answers": ["1995","1997","1994","1996"],
+        "correct_answer": "1996",
+        "difficulty": 1,
+        "passed": false
+    },
+
+    {
+        "question": "What is 2Pac's first song?",
+        "answers": ["Hit 'Em Up","Trapped","I Don't Give a Fuck","Same Song"],
+        "correct_answer": "Same Song",
+        "difficulty": 1,
+        "passed": false
+    }
+]
