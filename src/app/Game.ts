@@ -40,7 +40,7 @@ export class Game{
         })
     }
 
-    ClearHome(){
+    Clear(){
         while(this.mainDiv.firstChild){
             this.mainDiv.removeChild(this.mainDiv.firstChild);
         }
@@ -48,11 +48,10 @@ export class Game{
     }
 
     async CreateQuiz(){
-        this.ClearHome();
+        this.Clear();
 
         const response = await fetch("src/data/questions.json");
         this.questions = await response.json();
-        console.log(this.questions);
 
         const question = document.createElement("p");
         question.classList.add("question");
@@ -79,19 +78,80 @@ export class Game{
         answer_4.innerHTML = this.questions[0].answers[3];
         this.mainDiv.appendChild(answer_4);
 
-        this.click$.pipe(
+        const next = document.createElement("button");
+        next.classList.add("next");
+        next.innerHTML = "Next"
+        next.hidden = true;
+        this.mainDiv.appendChild(next);
+
+        let lives = 3;
+        let score = 0;
+
+        this.clickSub = this.click$.pipe(
             filter(event => event.target instanceof HTMLButtonElement),
             map(event => event.target as HTMLButtonElement),
         ).subscribe(clickedButton=>{
-            if(clickedButton.innerHTML === this.questions[0].correct_answer)
+            if(clickedButton.innerHTML === this.questions[0].correct_answer){
                 console.log("Tacan");
-            else
+                next.hidden = false;
+                answer_1.disabled = true;
+                answer_2.disabled = true;
+                answer_3.disabled = true;
+                answer_4.disabled = true;
+            }
+            else if(clickedButton.innerHTML === "Next"){
+                next.hidden = true;
+                if(lives == 0){
+                    this.Clear();
+                    this.CreateGameOver(score);
+                }
+                answer_1.disabled = false;
+                answer_2.disabled = false;
+                answer_3.disabled = false;
+                answer_4.disabled = false;
+            }
+            else{
                 console.log("Netacan");
+                next.hidden = false;
+                lives--;
+                console.log(lives);
+                answer_1.disabled = true;
+                answer_2.disabled = true;
+                answer_3.disabled = true;
+                answer_4.disabled = true;
+            }
+        })
+    }
+
+    CreateGameOver(score: number) {
+        const pointsText = document.createElement("p");
+        pointsText.classList.add("pointsText");
+        pointsText.innerHTML = "You earned: ";
+        this.mainDiv.appendChild(pointsText);
+
+        const pointsNumber = document.createElement("p");
+        pointsNumber.classList.add("pointsNumber");
+        pointsNumber.innerHTML = String(score) + " points!";
+        this.mainDiv.appendChild(pointsNumber);
+
+        // Ako je ostvario dovoljno poena unesi ime za Scoreboard
+
+        const home = document.createElement("button");
+        home.classList.add("home");
+        home.innerHTML = "Home";
+        this.mainDiv.appendChild(home);
+
+        this.clickSub = this.click$.pipe(
+            filter(event => event.target instanceof HTMLButtonElement),
+            map(event => event.target as HTMLButtonElement),
+        ).subscribe(clickedButton=>{
+            this.Clear();
+            this.CreateHome();
         })
     }
 
     async CreateScoreboard(){
-        this.ClearHome();
+        this.Clear();
 
         const response = await fetch("src/data/scoreboard.json");
         const scoreboard: Scoreboard[] = await response.json();
@@ -131,6 +191,19 @@ export class Game{
 
             boardBody.appendChild(row);
         });
+
+        const home = document.createElement("button");
+        home.classList.add("home");
+        home.innerHTML = "Home";
+        this.mainDiv.appendChild(home);
+
+        this.clickSub = this.click$.pipe(
+            filter(event => event.target instanceof HTMLButtonElement),
+            map(event => event.target as HTMLButtonElement),
+        ).subscribe(clickedButton=>{
+            this.Clear();
+            this.CreateHome();
+        })
     }
 
 }
