@@ -29,5 +29,61 @@
         "correct_answer": "2Pac",
         "difficulty": 1,
         "passed": false
+    },
+
+    {
+        "question": "Who was not a member of N.W.A?",
+        "answers": ["MC Ren","Ice Cube","Eazy-E","Spice 1"],
+        "correct_answer": "Spice 1",
+        "difficulty": 1,
+        "passed": false
+    },
+
+    {
+        "question": "What label did Suge Knight and Dr. Dre start?",
+        "answers": ["Death Row","Ruthless Records","Interscope","Aftermath"],
+        "correct_answer": "Death Row",
+        "difficulty": 1,
+        "passed": false
+    },
+
+    {
+        "question": "Which rapper released the hit single Gin and Juice in the 90s?",
+        "answers": ["Snoop Dogg", "Ice Cube", "2Pac", "Eazy-E"],
+        "correct_answer": "Snoop Dogg",
+        "difficulty": 1,
+        "passed": false
+    },
+
+    {
+        "question": "Which hip hop artist released the album All Eyez on Me in 1996?",
+        "answers": ["2Pac", "Snoop Dogg", "Ice Cube", "Dr. Dre"],
+        "correct_answer": "2Pac",
+        "difficulty": 1,
+        "passed": false
+    },
+
+    {
+        "question": "Finish the lyrics: \"It was a clear black night...\"",
+        "answers": ["just hit the Eastside of LBC", "a clear white moon", "I was looking for some fool", "turning a gat full"],
+        "correct_answer": "a clear white moon",
+        "difficulty": 1,
+        "passed": false
+    },
+
+    {
+        "question": "Name a song: \"Just waking in the morning gotta thank God...\"",
+        "answers": ["It Was a Good Day","Who Am I","Regulate","Check Yo Self"],
+        "correct_answer": "It Was a Good Day",
+        "difficulty": 1,
+        "passed": false
+    },
+
+    {
+        "question": "What was Eazy-E's cause of death?",
+        "answers": ["Murder","Natural","AIDS","He is still alive"],
+        "correct_answer": "AIDS",
+        "difficulty": 1,
+        "passed": false
     }
 ]
