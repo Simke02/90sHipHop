@@ -1,4 +1,4 @@
-import { Observable, Subscription, filter, fromEvent, map } from "rxjs";
+import { Observable, Subscription, filter, fromEvent, interval, map, mapTo, merge, mergeMap, of, startWith, switchMap, take, takeUntil, timer } from "rxjs";
 import { Question } from "./Question";
 import { Scoreboard } from "./Scoreboard";
 
@@ -7,6 +7,7 @@ export class Game{
     click$: Observable<Event>;
     clickSub: Subscription;
     questions: Question[];
+    lightningQuestion$: Observable<any>;
 
     constructor(mainDiv: HTMLDivElement) {
         this.mainDiv = mainDiv;
@@ -18,6 +19,11 @@ export class Game{
         title.classList.add("title");
         title.innerHTML = "90's Hip Hop Quiz";
         this.mainDiv.appendChild(title);
+
+        const lightningButton = document.createElement("button");
+        lightningButton.classList.add("lightning");
+        lightningButton.innerHTML = "Lightning Round";
+        this.mainDiv.appendChild(lightningButton);
 
         const startButton = document.createElement("button");
         startButton.classList.add("start");
@@ -37,6 +43,8 @@ export class Game{
                 this.CreateQuiz();
             else if(clickedButton.className === "scoreboard")
                 this.CreateScoreboard();
+            else if(clickedButton.className === "lightning")
+                this.CreateLightningRound();
         })
     }
 
@@ -206,4 +214,65 @@ export class Game{
         })
     }
 
+    async CreateLightningRound(){
+        this.Clear();
+
+        const question = document.createElement("p");
+        question.classList.add("question");
+        this.mainDiv.appendChild(question);
+
+        /*const buttons = document.createElement("div");
+        this.mainDiv.appendChild(buttons);*/
+
+        const answer_1 = document.createElement("button");
+        answer_1.classList.add("answer_1");
+        this.mainDiv.appendChild(answer_1);
+
+        const answer_2 = document.createElement("button");
+        answer_2.classList.add("answer_2");
+        this.mainDiv.appendChild(answer_2);
+
+        const answer_3 = document.createElement("button");
+        answer_3.classList.add("answer_3");
+        this.mainDiv.appendChild(answer_3);
+
+        const answer_4 = document.createElement("button");
+        answer_4.classList.add("answer_4");
+        this.mainDiv.appendChild(answer_4);
+
+        const response = await fetch("src/data/questions.json");
+        this.questions = await response.json();
+
+        const timer$ = timer(50000);
+        const click$ = fromEvent(this.mainDiv, "click").pipe(
+            filter(event => event.target instanceof HTMLButtonElement),
+            map(event => event.target as HTMLButtonElement)
+        )
+        
+        const merged$= click$.pipe(
+            switchMap((clicK)=>{
+                const clickANDtime$ = merge(of(clicK), timer(5000, 5000));
+                return clickANDtime$;
+            })
+        )
+
+        this.lightningQuestion$ = merged$.pipe(takeUntil(timer$));
+
+        this.lightningQuestion$.subscribe({
+            next: (event)=>{
+                if(event instanceof HTMLButtonElement)
+                    console.log(event);
+                let i = Math.floor(Math.random() * this.questions.length);
+                while(this.questions[i].passed===true)
+                    i = Math.floor(Math.random() * this.questions.length);
+                console.log(this.questions[i]);
+                question.innerHTML = this.questions[i].question;
+                answer_1.innerHTML = this.questions[i].answers[3]
+                answer_2.innerHTML = this.questions[i].answers[0];
+                answer_3.innerHTML = this.questions[i].answers[1];
+                answer_4.innerHTML = this.questions[i].answers[2];
+                console.log((new Date()).getSeconds());
+            }
+        })
+    }
 }

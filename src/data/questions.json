@@ -13,5 +13,21 @@
         "correct_answer": "Same Song",
         "difficulty": 1,
         "passed": false
+    },
+
+    {
+        "question": "Calvin Cordozar Broadus is the name of which rap artist?",
+        "answers": ["2Pac","Ice Cube","Snoop Dogg","Dr. Dre"],
+        "correct_answer": "Snoop Dogg",
+        "difficulty": 1,
+        "passed": false
+    },
+
+    {
+        "question": "What rapper was supposed to play the role of Jody in movie Baby Boy?",
+        "answers": ["Kurupt","Ice Cube","Eazy-E","2Pac"],
+        "correct_answer": "2Pac",
+        "difficulty": 1,
+        "passed": false
     }
 ]
