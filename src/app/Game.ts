@@ -1,6 +1,7 @@
-import { Observable, Subscription, filter, fromEvent, interval, map, mapTo, merge, mergeMap, of, startWith, switchMap, take, takeUntil, timer } from "rxjs";
+import { Observable, Subscription, concatMap, filter, fromEvent, interval, map, mapTo, merge, mergeMap, of, startWith, switchMap, take, takeUntil, timer, zip } from "rxjs";
 import { Question } from "./Question";
-import { Scoreboard } from "./Scoreboard";
+import { Scoreboard, ScoreboardI } from "./Scoreboard";
+import { Name } from "./Name";
 
 export class Game{
     mainDiv: HTMLDivElement
@@ -40,18 +41,25 @@ export class Game{
         scoreboardButton.innerHTML = "Scoreboard"
         this.mainDiv.appendChild(scoreboardButton);
 
+        const nameGeneratorButton = document.createElement("button");
+        nameGeneratorButton.classList.add("scoreboard");
+        nameGeneratorButton.innerHTML = "Name Generator"
+        this.mainDiv.appendChild(nameGeneratorButton);
+
         this.clickSub = this.click$.pipe(
             filter(event => event.target instanceof HTMLButtonElement),
             map(event => event.target as HTMLButtonElement),
         ).subscribe(clickedButton=>{
-            if(clickedButton.className === "start")
+            if(clickedButton.innerHTML === "Start")
                 this.CreateQuiz();
-            else if(clickedButton.className === "scoreboard")
+            else if(clickedButton.innerHTML === "Scoreboard")
                 this.CreateScoreboard();
-            else if(clickedButton.className === "lightning")
+            else if(clickedButton.innerHTML === "Lightning Round")
                 this.CreateLightningRound();
-            else if(clickedButton.className === "quickest")
+            else if(clickedButton.innerHTML === "Quickest Player")
                 this.CreateQuickestPlayer();
+            else if(clickedButton.innerHTML === "Name Generator")
+                this.CreateRandomNameGenerator()
         })
     }
 
@@ -68,29 +76,52 @@ export class Game{
         const response = await fetch("src/data/questions.json");
         this.questions = await response.json();
 
+        let i = Math.floor(Math.random() * this.questions.length);
+        let correct_answer = this.questions[i].correct_answer;
+
+        const scoreText = document.createElement("p");
+        scoreText.classList.add("scoreText");
+        scoreText.innerHTML = "Score: ";
+        this.mainDiv.appendChild(scoreText);
+
+        const scoreValue = document.createElement("p");
+        scoreValue.classList.add("scoreValue");
+        scoreValue.innerHTML = String(0);
+        this.mainDiv.appendChild(scoreValue);
+
+        const livesText = document.createElement("p");
+        livesText.classList.add("livesText");
+        livesText.innerHTML = "Lives: ";
+        this.mainDiv.appendChild(livesText);
+
+        const livesValue = document.createElement("p");
+        livesValue.classList.add("livesValue");
+        livesValue.innerHTML = String(3);
+        this.mainDiv.appendChild(livesValue);
+
         const question = document.createElement("p");
         question.classList.add("question");
-        question.innerHTML = this.questions[0].question;
+        question.innerHTML = this.questions[i].question;
         this.mainDiv.appendChild(question);
 
         const answer_1 = document.createElement("button");
         answer_1.classList.add("answer_1");
-        answer_1.innerHTML = this.questions[0].answers[0];
+        answer_1.innerHTML = this.questions[i].answers[0];
         this.mainDiv.appendChild(answer_1);
 
         const answer_2 = document.createElement("button");
         answer_2.classList.add("answer_2");
-        answer_2.innerHTML = this.questions[0].answers[1];
+        answer_2.innerHTML = this.questions[i].answers[1];
         this.mainDiv.appendChild(answer_2);
 
         const answer_3 = document.createElement("button");
         answer_3.classList.add("answer_3");
-        answer_3.innerHTML = this.questions[0].answers[2];
+        answer_3.innerHTML = this.questions[i].answers[2];
         this.mainDiv.appendChild(answer_3);
 
         const answer_4 = document.createElement("button");
         answer_4.classList.add("answer_4");
-        answer_4.innerHTML = this.questions[0].answers[3];
+        answer_4.innerHTML = this.questions[i].answers[3];
         this.mainDiv.appendChild(answer_4);
 
         const next = document.createElement("button");
@@ -106,19 +137,37 @@ export class Game{
             filter(event => event.target instanceof HTMLButtonElement),
             map(event => event.target as HTMLButtonElement),
         ).subscribe(clickedButton=>{
-            if(clickedButton.innerHTML === this.questions[0].correct_answer){
+            if(clickedButton.innerHTML === correct_answer){
                 console.log("Tacan");
                 next.hidden = false;
                 answer_1.disabled = true;
                 answer_2.disabled = true;
                 answer_3.disabled = true;
                 answer_4.disabled = true;
+                score+=this.questions[i].difficulty;
+                scoreValue.innerHTML = String(score);
             }
             else if(clickedButton.innerHTML === "Next"){
                 next.hidden = true;
                 if(lives == 0){
                     this.Clear();
                     this.CreateGameOver(score);
+                }
+                else{
+                    this.questions.splice(i, 1);
+                    if(this.questions.length > 0){
+                        i = Math.floor(Math.random() * this.questions.length);
+                        correct_answer = this.questions[i].correct_answer;
+                        question.innerHTML = this.questions[i].question;
+                        answer_1.innerHTML = this.questions[i].answers[0];
+                        answer_2.innerHTML = this.questions[i].answers[1];
+                        answer_3.innerHTML = this.questions[i].answers[2];
+                        answer_4.innerHTML = this.questions[i].answers[3];
+                    }
+                    else{
+                        this.Clear();
+                        this.CreateGameOver(score);
+                    }
                 }
                 answer_1.disabled = false;
                 answer_2.disabled = false;
@@ -129,7 +178,7 @@ export class Game{
                 console.log("Netacan");
                 next.hidden = false;
                 lives--;
-                console.log(lives);
+                livesValue.innerHTML = String(lives);
                 answer_1.disabled = true;
                 answer_2.disabled = true;
                 answer_3.disabled = true;
@@ -138,7 +187,7 @@ export class Game{
         })
     }
 
-    CreateGameOver(score: number) {
+    async CreateGameOver(score: number) {
         const pointsText = document.createElement("p");
         pointsText.classList.add("pointsText");
         pointsText.innerHTML = "You earned: ";
@@ -151,17 +200,80 @@ export class Game{
 
         // Ako je ostvario dovoljno poena unesi ime za Scoreboard
 
+        const response = await fetch("src/data/scoreboard.json");
+        const scoreboard: ScoreboardI = await response.json();
+
+        let i = 0; 
+        let found = false;
+        let foundIndex = 0;
+
+        for(i;i<5;i++){
+            if(scoreboard.items[i].score<score){
+                found=true;
+                foundIndex=i;
+                i = 5;
+            }
+        }
+
+        const inputName = document.createElement("input");
+        inputName.classList.add("inputName");
+        inputName.hidden = true;
+        this.mainDiv.appendChild(inputName);
+
+        const enterName = document.createElement("button");
+        enterName.classList.add("enterName");
+        enterName.hidden = true;
+        enterName.innerHTML = "Enter";
+        this.mainDiv.appendChild(enterName);
+
+        if(found){
+            inputName.hidden = false;
+            enterName.hidden = false;
+        }
+
         const home = document.createElement("button");
         home.classList.add("home");
         home.innerHTML = "Home";
         this.mainDiv.appendChild(home);
 
+        const anotherRound = document.createElement("button");
+        anotherRound.classList.add("anotherRound");
+        anotherRound.innerHTML = "Another Round";
+        this.mainDiv.appendChild(anotherRound);
+
         this.clickSub = this.click$.pipe(
             filter(event => event.target instanceof HTMLButtonElement),
             map(event => event.target as HTMLButtonElement),
         ).subscribe(clickedButton=>{
-            this.Clear();
-            this.CreateHome();
+            if(clickedButton.innerHTML === "Home"){
+                this.Clear();
+                this.CreateHome();
+            }
+            else if(clickedButton.innerHTML === "Another Round")
+                this.CreateQuiz();
+            else if(clickedButton.innerHTML === "Enter"){
+                inputName.hidden = true;
+                enterName.hidden = true;
+            fetch(`http://localhost:3000/items/${foundIndex+1}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: inputName.value, score: score}),
+              })
+              i = foundIndex;
+              for(i;i<4;i++){
+                fetch(`http://localhost:3000/items/${i+2}`, {
+                    method: 'PATCH',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({name: scoreboard.items[i].name, score: scoreboard.items[i].score}),
+                  })
+              }
+              this.Clear();
+              this.CreateHome();
+        }
         })
     }
 
@@ -169,7 +281,28 @@ export class Game{
         this.Clear();
 
         const response = await fetch("src/data/scoreboard.json");
-        const scoreboard: Scoreboard[] = await response.json();
+        const scoreboard: ScoreboardI = await response.json();
+
+        let scoreboardQ: Scoreboard[] = [];
+        let scoreboardQP: Scoreboard[] = [];
+        let scoreboardLR: Scoreboard[] = [];
+
+        let i = 0;
+        for(i;i<scoreboard.items.length;i++){
+            if(i<5){
+                scoreboardQ.push(scoreboard.items[i]);
+            }
+            else if(i>=5&&i<10){
+                scoreboardQP.push(scoreboard.items[i]);
+            }
+            else{
+                scoreboardLR.push(scoreboard.items[i]);
+            }
+        }
+
+        const title = document.createElement("p");
+        title.innerHTML = "Quiz";
+        this.mainDiv.appendChild(title);
         
         const board = document.createElement("table");
         board.classList.add("board");
@@ -193,7 +326,7 @@ export class Game{
         boardBody.classList.add("tbody");
         board.appendChild(boardBody);
 
-        scoreboard.forEach(score => {
+        scoreboardQ.forEach(score => {
             const row = document.createElement("tr");
 
             const nameCell = document.createElement("td");
@@ -205,6 +338,94 @@ export class Game{
             row.appendChild(scoreCell);
 
             boardBody.appendChild(row);
+        });
+
+        const breakLine = document.createElement("br");
+        this.mainDiv.appendChild(breakLine);
+
+        const titleQP = document.createElement("p");
+        titleQP.innerHTML = "Quickest Player";
+        this.mainDiv.appendChild(titleQP);
+        
+        const boardQP = document.createElement("table");
+        boardQP.classList.add("boardQP");
+        this.mainDiv.appendChild(boardQP);
+
+        const boardHeadQP = document.createElement("thead");
+        boardHeadQP.classList.add("boardHeadQP");
+        boardQP.appendChild(boardHeadQP);
+
+        const nameHeadQP = document.createElement("th");
+        nameHeadQP.classList.add("nameHeadQP");
+        nameHeadQP.innerHTML = "Name";
+        boardHeadQP.appendChild(nameHeadQP);
+
+        const scoreHeadQP = document.createElement("th");
+        scoreHeadQP.classList.add("scoreHeadQP");
+        scoreHeadQP.innerHTML = "Score";
+        boardHeadQP.appendChild(scoreHeadQP);
+
+        const boardBodyQP = document.createElement("tbody");
+        boardBodyQP.classList.add("tbodyQP");
+        boardQP.appendChild(boardBodyQP);
+
+        scoreboardQP.forEach(score => {
+            const row = document.createElement("tr");
+
+            const nameCell = document.createElement("td");
+            nameCell.innerHTML = score.name;
+            row.appendChild(nameCell);
+
+            const scoreCell = document.createElement("td");
+            scoreCell.innerHTML = String(score.score);
+            row.appendChild(scoreCell);
+
+            boardBodyQP.appendChild(row);
+        });
+
+        const dare = document.createElement("p");
+        dare.innerHTML = "I bet you can't finish in all of them times combined: "
+        +scoreboardQP.reduce((acc, scoreboard)=>acc + scoreboard.score, 0)+"s";
+        this.mainDiv.appendChild(dare);
+
+        const titleLR = document.createElement("p");
+        titleLR.innerHTML = "Lightning Round";
+        this.mainDiv.appendChild(titleLR);
+        
+        const boardLR = document.createElement("table");
+        boardLR.classList.add("boardLR");
+        this.mainDiv.appendChild(boardLR);
+
+        const boardHeadLR = document.createElement("thead");
+        boardHeadLR.classList.add("boardHeadLR");
+        boardLR.appendChild(boardHeadLR);
+
+        const nameHeadLR = document.createElement("th");
+        nameHeadLR.classList.add("nameHeadLR");
+        nameHeadLR.innerHTML = "Name";
+        boardHeadLR.appendChild(nameHeadLR);
+
+        const scoreHeadLR = document.createElement("th");
+        scoreHeadLR.classList.add("scoreHeadLR");
+        scoreHeadLR.innerHTML = "Score";
+        boardHeadLR.appendChild(scoreHeadLR);
+
+        const boardBodyLR = document.createElement("tbody");
+        boardBodyLR.classList.add("tbodyLR");
+        boardLR.appendChild(boardBodyLR);
+
+        scoreboardLR.forEach(score => {
+            const row = document.createElement("tr");
+
+            const nameCell = document.createElement("td");
+            nameCell.innerHTML = score.name;
+            row.appendChild(nameCell);
+
+            const scoreCell = document.createElement("td");
+            scoreCell.innerHTML = String(score.score);
+            row.appendChild(scoreCell);
+
+            boardBodyLR.appendChild(row);
         });
 
         const home = document.createElement("button");
@@ -264,7 +485,7 @@ export class Game{
             this.CreateLRGameOver(scorE);
         }
 
-        const timer$ = timer(10000); //Koliko traje runda
+        const timer$ = timer(25000); //Koliko traje runda
         const click$ = fromEvent(this.mainDiv, "click").pipe(
             filter(event => event.target instanceof HTMLButtonElement),
             map(event => event.target as HTMLButtonElement)
@@ -313,15 +534,46 @@ export class Game{
         })   
     }
 
-    CreateLRGameOver(score: number) {
+    async CreateLRGameOver(score: number) {
         this.Clear();
 
         const scoreText = document.createElement("p");
         scoreText.classList.add("scoreText");
-        scoreText.innerHTML = "You answered correctly "+ String(score)+ " questions";
+        scoreText.innerHTML = "You answered correctly "+ String(score) + " questions";
         this.mainDiv.appendChild(scoreText);
 
         // Ako je ostvario dovoljno poena unesi ime za Scoreboard
+
+        const response = await fetch("src/data/scoreboard.json");
+        const scoreboard: ScoreboardI = await response.json();
+
+        let i = 10; 
+        let found = false;
+        let foundIndex = 0;
+
+        for(i;i<15;i++){
+            if(scoreboard.items[i].score<score){
+                found=true;
+                foundIndex=i;
+                i=15;
+            }
+        }
+
+        const inputName = document.createElement("input");
+        inputName.classList.add("inputName");
+        inputName.hidden = true;
+        this.mainDiv.appendChild(inputName);
+
+        const enterName = document.createElement("button");
+        enterName.classList.add("enterName");
+        enterName.hidden = true;
+        enterName.innerHTML = "Enter";
+        this.mainDiv.appendChild(enterName);
+
+        if(found){
+            inputName.hidden = false;
+            enterName.hidden = false;
+        }
 
         const home = document.createElement("button");
         home.classList.add("home");
@@ -343,6 +595,29 @@ export class Game{
             }
             else if(clickedButton.innerHTML === "Another Round")
                 this.CreateLightningRound();
+            else if(clickedButton.innerHTML === "Enter"){
+                inputName.hidden = true;
+                enterName.hidden = true;
+            fetch(`http://localhost:3000/items/${foundIndex+1}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: inputName.value, score: score}),
+              })
+              i = foundIndex;
+              for(i;i<14;i++){
+                fetch(`http://localhost:3000/items/${i+2}`, {
+                    method: 'PATCH',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({name: scoreboard.items[i].name, score: scoreboard.items[i].score}),
+                  })
+              }
+              this.Clear();
+              this.CreateHome();
+            }
         })
     }
 
@@ -468,18 +743,18 @@ export class Game{
         this.mainDiv.appendChild(scoreText);
 
         // Ako je ostvario dovoljno poena unesi ime za Scoreboard
-        const response = await fetch("src/data/scoreboardQP.json");
-        const scoreboard: Scoreboard[] = await response.json();
+        const response = await fetch("src/data/scoreboard.json");
+        const scoreboard: ScoreboardI = await response.json();
 
-        let i = 0; 
+        let i = 5; 
         let found = false;
         let foundIndex = 0;
 
-        for(i;i<scoreboard.length;i++){
-            if(scoreboard[i].score>time){
+        for(i;i<10;i++){
+            if(scoreboard.items[i].score>time){
                 found=true;
                 foundIndex=i;
-                i=scoreboard.length;
+                i=10;
             }
         }
 
@@ -520,17 +795,85 @@ export class Game{
             else if(clickedButton.innerHTML === "Another Round")
                 this.CreateQuickestPlayer();
             else if(clickedButton.innerHTML === "Enter"){
-                scoreboard.splice(foundIndex, 0, new Scoreboard(inputName.innerHTML, time))
-                scoreboard.pop();
                 inputName.hidden = true;
                 enterName.hidden = true;
-                /*fetch("src/data/scoreboardQP.json", {
-                    method: 'POST',
+            fetch(`http://localhost:3000/items/${foundIndex+1}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({name: inputName.value, score: time}),
+              })
+              i = foundIndex;
+              for(i;i<9;i++){
+                fetch(`http://localhost:3000/items/${i+2}`, {
+                    method: 'PATCH',
                     headers: {
                       'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(scoreboard),
-                  })*/
+                    body: JSON.stringify({name: scoreboard.items[i].name, score: scoreboard.items[i].score}),
+                  })
+              }
+              this.Clear();
+              this.CreateHome();
+            }
+        })
+    }
+
+    shuffleArray(array: Name[]): Name[] {
+        const shuffledArray = [...array];
+        for (let i = shuffledArray.length - 1; i > 0; i--) {
+          const randomIndex = Math.floor(Math.random() * (i + 1));
+          [shuffledArray[i], shuffledArray[randomIndex]] = [shuffledArray[randomIndex], shuffledArray[i]];
+        }
+        return shuffledArray;
+    }
+
+    async CreateRandomNameGenerator(){
+        this.Clear();
+
+        let response = await fetch("src/data/first.json");
+        let first: Name[] = await response.json();
+        first = this.shuffleArray(first);
+        const first$ = of(first);
+
+        response = await fetch("src/data/last.json");
+        let last: Name[] = await response.json();
+        last = this.shuffleArray(last);
+        const last$ = of(last);
+
+        zip(first$, last$).pipe(
+            map(([f, l]) => ({f, l}))
+        ).subscribe({
+            next: (value)=>{
+                let i = 0;
+                for(i;i<first.length;i++){
+                    const name = document.createElement("p");
+                    name.innerHTML = value.f[i].name + " " + value.l[i].name;
+                    this.mainDiv.appendChild(name);
+                }
+            },
+            complete: ()=>{
+                const onceAgain = document.createElement("button");
+                onceAgain.innerHTML = "Generate";
+                this.mainDiv.append(onceAgain);
+        
+                const home = document.createElement("button");
+                home.innerHTML = "Home";
+                this.mainDiv.append(home);
+            }
+        })
+
+        this.clickSub = this.click$.pipe(
+            filter(event => event.target instanceof HTMLButtonElement),
+            map(event => event.target as HTMLButtonElement),
+        ).subscribe(clickedButton=>{
+            if(clickedButton.innerHTML === "Home"){
+                this.Clear();
+                this.CreateHome();    
+            }
+            else if(clickedButton.innerHTML === "Generate"){
+                this.CreateRandomNameGenerator()
             }
         })
     }

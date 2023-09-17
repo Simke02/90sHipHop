@@ -3,87 +3,76 @@
         "question": "What year did 2Pac died?",
         "answers": ["1995","1997","1994","1996"],
         "correct_answer": "1996",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "What is 2Pac's first song?",
         "answers": ["Hit 'Em Up","Trapped","I Don't Give a Fuck","Same Song"],
         "correct_answer": "Same Song",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "Calvin Cordozar Broadus is the name of which rap artist?",
         "answers": ["2Pac","Ice Cube","Snoop Dogg","Dr. Dre"],
         "correct_answer": "Snoop Dogg",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "What rapper was supposed to play the role of Jody in movie Baby Boy?",
         "answers": ["Kurupt","Ice Cube","Eazy-E","2Pac"],
         "correct_answer": "2Pac",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "Who was not a member of N.W.A?",
         "answers": ["MC Ren","Ice Cube","Eazy-E","Spice 1"],
         "correct_answer": "Spice 1",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "What label did Suge Knight and Dr. Dre start?",
         "answers": ["Death Row","Ruthless Records","Interscope","Aftermath"],
         "correct_answer": "Death Row",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "Which rapper released the hit single Gin and Juice in the 90s?",
         "answers": ["Snoop Dogg", "Ice Cube", "2Pac", "Eazy-E"],
         "correct_answer": "Snoop Dogg",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "Which hip hop artist released the album All Eyez on Me in 1996?",
         "answers": ["2Pac", "Snoop Dogg", "Ice Cube", "Dr. Dre"],
         "correct_answer": "2Pac",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "Finish the lyrics: \"It was a clear black night...\"",
         "answers": ["just hit the Eastside of LBC", "a clear white moon", "I was looking for some fool", "turning a gat full"],
         "correct_answer": "a clear white moon",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "Name a song: \"Just waking in the morning gotta thank God...\"",
         "answers": ["It Was a Good Day","Who Am I","Regulate","Check Yo Self"],
         "correct_answer": "It Was a Good Day",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     },
 
     {
         "question": "What was Eazy-E's cause of death?",
         "answers": ["Murder","Natural","AIDS","He is still alive"],
         "correct_answer": "AIDS",
-        "difficulty": 1,
-        "passed": false
+        "difficulty": 1
     }
 ]

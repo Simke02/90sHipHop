@@ -3,5 +3,4 @@ export class Question{
     answers: string[4];
     correct_answer: string;
     difficulty: number;
-    passed: boolean;
 }

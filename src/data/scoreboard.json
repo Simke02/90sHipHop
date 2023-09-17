@@ -1,11 +1,79 @@
-[
+{
+  "items": [
     {
-        "name": "Andrija",
-        "score": 4323
+      "id": 1,
+      "name": "Andrija",
+      "score": 50
     },
-
     {
-        "name": "Sava",
-        "score": 1660
+      "id": 2,
+      "name": "Sava",
+      "score": 26
+    },
+    {
+      "id": 3,
+      "name": "Slajmz",
+      "score": 4
+    },
+    {
+      "id": 4,
+      "name": "Teodora",
+      "score": 3
+    },
+    {
+      "id": 5,
+      "name": "Petar",
+      "score": 2
+    },
+    {
+      "id": 6,
+      "name": "Andrija",
+      "score": 20
+    },
+    {
+      "id": 7,
+      "name": "Slajmz",
+      "score": 25
+    },
+    {
+      "id": 8,
+      "name": "Sava",
+      "score": 30
+    },
+    {
+      "id": 9,
+      "name": "Teodora",
+      "score": 40
+    },
+    {
+      "id": 10,
+      "name": "Ikac",
+      "score": 45
+    },
+    {
+      "id": 11,
+      "name": "Andrija",
+      "score": 6
+    },
+    {
+      "id": 12,
+      "name": "Sava",
+      "score": 5
+    },
+    {
+      "id": 13,
+      "name": "Slajmz",
+      "score": 5
+    },
+    {
+      "id": 14,
+      "name": "Teodora",
+      "score": 3
+    },
+    {
+      "id": 15,
+      "name": "Petar",
+      "score": 2
     }
-]
+  ]
+}
