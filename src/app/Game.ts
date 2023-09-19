@@ -791,8 +791,8 @@ export class Game{
                         minutes--;
                         console.log("Smanjeni minuti "+minutes);
                     }
-                    if(minutes!==1 || ((new Date()).getSeconds() - time.getSeconds())>0){
-                        if(minutes !== 0 )
+                    if(minutes>0/*minutes!==1 || ((new Date()).getSeconds() - time.getSeconds())>0*/){
+                        if((new Date()).getSeconds()<time.getSeconds())
                             minutes--;
                         console.log("Dodati minuti "+ minutes);
                         differnce+=minutes*60;
