@@ -16,35 +16,44 @@ export class Game{
     }
 
     CreateHome(){
+
+        const container = document.createElement("div");
+        container.classList.add("container");
+        this.mainDiv.appendChild(container);
+
         const title = document.createElement("h1");
         title.classList.add("title");
         title.innerHTML = "90's Hip Hop Quiz";
-        this.mainDiv.appendChild(title);
+        container.appendChild(title);
+
+        const buttonsGrid = document.createElement("div");
+        buttonsGrid.classList.add("buttonsGrid");
+        container.append(buttonsGrid);
 
         const lightningButton = document.createElement("button");
-        lightningButton.classList.add("lightning");
+        lightningButton.classList.add("buttonH");
         lightningButton.innerHTML = "Lightning Round";
-        this.mainDiv.appendChild(lightningButton);
+        buttonsGrid.appendChild(lightningButton);
 
         const quickestButton = document.createElement("button");
-        quickestButton.classList.add("quickest");
+        quickestButton.classList.add("buttonH");
         quickestButton.innerHTML = "Quickest Player";
-        this.mainDiv.appendChild(quickestButton);
-
-        const startButton = document.createElement("button");
-        startButton.classList.add("start");
-        startButton.innerHTML = "Start";
-        this.mainDiv.appendChild(startButton);
+        buttonsGrid.appendChild(quickestButton);
 
         const scoreboardButton = document.createElement("button");
-        scoreboardButton.classList.add("scoreboard");
+        scoreboardButton.classList.add("buttonH");
         scoreboardButton.innerHTML = "Scoreboard"
-        this.mainDiv.appendChild(scoreboardButton);
+        buttonsGrid.appendChild(scoreboardButton);
 
         const nameGeneratorButton = document.createElement("button");
-        nameGeneratorButton.classList.add("scoreboard");
+        nameGeneratorButton.classList.add("buttonH");
         nameGeneratorButton.innerHTML = "Name Generator"
-        this.mainDiv.appendChild(nameGeneratorButton);
+        buttonsGrid.appendChild(nameGeneratorButton);
+
+        const startButton = document.createElement("button");
+        startButton.classList.add("full-width");
+        startButton.innerHTML = "Start";
+        buttonsGrid.appendChild(startButton);
 
         this.clickSub = this.click$.pipe(
             filter(event => event.target instanceof HTMLButtonElement),
@@ -79,56 +88,64 @@ export class Game{
         let i = Math.floor(Math.random() * this.questions.length);
         let correct_answer = this.questions[i].correct_answer;
 
+        const container = document.createElement("div");
+        container.classList.add("container");
+        this.mainDiv.appendChild(container);
+
+        const scoreLives = document.createElement("div");
+        scoreLives.classList.add("scoreLives");
+        container.appendChild(scoreLives);
+
         const scoreText = document.createElement("p");
         scoreText.classList.add("scoreText");
-        scoreText.innerHTML = "Score: ";
-        this.mainDiv.appendChild(scoreText);
-
-        const scoreValue = document.createElement("p");
-        scoreValue.classList.add("scoreValue");
-        scoreValue.innerHTML = String(0);
-        this.mainDiv.appendChild(scoreValue);
+        scoreText.innerHTML = "Score: 0";
+        scoreLives.appendChild(scoreText);
 
         const livesText = document.createElement("p");
         livesText.classList.add("livesText");
-        livesText.innerHTML = "Lives: ";
-        this.mainDiv.appendChild(livesText);
-
-        const livesValue = document.createElement("p");
-        livesValue.classList.add("livesValue");
-        livesValue.innerHTML = String(3);
-        this.mainDiv.appendChild(livesValue);
+        livesText.innerHTML = "Lives: 3";
+        scoreLives.appendChild(livesText);
 
         const question = document.createElement("p");
         question.classList.add("question");
         question.innerHTML = this.questions[i].question;
-        this.mainDiv.appendChild(question);
+        container.appendChild(question);
+
+        const buttonsGrid = document.createElement("div");
+        buttonsGrid.classList.add("buttonsGrid");
+        container.append(buttonsGrid);
 
         const answer_1 = document.createElement("button");
-        answer_1.classList.add("answer_1");
+        answer_1.id = "1";
+        answer_1.classList.add("buttonH");
         answer_1.innerHTML = this.questions[i].answers[0];
-        this.mainDiv.appendChild(answer_1);
+        buttonsGrid.appendChild(answer_1);
 
         const answer_2 = document.createElement("button");
-        answer_2.classList.add("answer_2");
+        answer_2.id = "2";
+        answer_2.classList.add("buttonH");
         answer_2.innerHTML = this.questions[i].answers[1];
-        this.mainDiv.appendChild(answer_2);
+        buttonsGrid.appendChild(answer_2);
 
         const answer_3 = document.createElement("button");
-        answer_3.classList.add("answer_3");
+        answer_3.id = "3";
+        answer_3.classList.add("buttonH");
         answer_3.innerHTML = this.questions[i].answers[2];
-        this.mainDiv.appendChild(answer_3);
+        buttonsGrid.appendChild(answer_3);
 
         const answer_4 = document.createElement("button");
-        answer_4.classList.add("answer_4");
+        answer_4.id = "4";
+        answer_4.classList.add("buttonH");
         answer_4.innerHTML = this.questions[i].answers[3];
-        this.mainDiv.appendChild(answer_4);
+        buttonsGrid.appendChild(answer_4);
 
         const next = document.createElement("button");
-        next.classList.add("next");
+        next.classList.add("full-width");
         next.innerHTML = "Next"
         next.hidden = true;
-        this.mainDiv.appendChild(next);
+        buttonsGrid.appendChild(next);
+
+        question.style.maxWidth = String(buttonsGrid.offsetWidth) + 'px';
 
         let lives = 3;
         let score = 0;
@@ -144,8 +161,10 @@ export class Game{
                 answer_2.disabled = true;
                 answer_3.disabled = true;
                 answer_4.disabled = true;
+                clickedButton.style.backgroundColor = "#006466";
+                sessionStorage.setItem('clicked', clickedButton.id);
                 score+=this.questions[i].difficulty;
-                scoreValue.innerHTML = String(score);
+                scoreText.innerHTML = "Score: "+String(score);
             }
             else if(clickedButton.innerHTML === "Next"){
                 next.hidden = true;
@@ -157,12 +176,18 @@ export class Game{
                     this.questions.splice(i, 1);
                     if(this.questions.length > 0){
                         i = Math.floor(Math.random() * this.questions.length);
+                        //Return the color of the button to normal
+                        const clickedID : any = sessionStorage.getItem('clicked');
+                        const clicked : any = document.getElementById(clickedID);
+                        if(clicked instanceof HTMLButtonElement)
+                            clicked.style.backgroundColor = "#6D7476";
                         correct_answer = this.questions[i].correct_answer;
                         question.innerHTML = this.questions[i].question;
                         answer_1.innerHTML = this.questions[i].answers[0];
                         answer_2.innerHTML = this.questions[i].answers[1];
                         answer_3.innerHTML = this.questions[i].answers[2];
                         answer_4.innerHTML = this.questions[i].answers[3];
+                        question.style.maxWidth = String(buttonsGrid.offsetWidth) + 'px';
                     }
                     else{
                         this.Clear();
@@ -173,30 +198,33 @@ export class Game{
                 answer_2.disabled = false;
                 answer_3.disabled = false;
                 answer_4.disabled = false;
+
             }
             else{
                 console.log("Netacan");
                 next.hidden = false;
                 lives--;
-                livesValue.innerHTML = String(lives);
+                livesText.innerHTML = "Lives: "+String(lives);
                 answer_1.disabled = true;
                 answer_2.disabled = true;
                 answer_3.disabled = true;
                 answer_4.disabled = true;
+                clickedButton.style.backgroundColor = "#780C0C";
+                sessionStorage.setItem('clicked', clickedButton.id);
             }
         })
     }
 
     async CreateGameOver(score: number) {
+
+        const containerGO = document.createElement("div");
+        containerGO.classList.add("containerGO");
+        this.mainDiv.appendChild(containerGO);
+
         const pointsText = document.createElement("p");
         pointsText.classList.add("pointsText");
-        pointsText.innerHTML = "You earned: ";
-        this.mainDiv.appendChild(pointsText);
-
-        const pointsNumber = document.createElement("p");
-        pointsNumber.classList.add("pointsNumber");
-        pointsNumber.innerHTML = String(score) + " points!";
-        this.mainDiv.appendChild(pointsNumber);
+        pointsText.innerHTML = "You earned: "+String(score)+ " points!";
+        containerGO.appendChild(pointsText);
 
         // Ako je ostvario dovoljno poena unesi ime za Scoreboard
 
@@ -215,31 +243,39 @@ export class Game{
             }
         }
 
+        const middleRow = document.createElement("div");
+        middleRow.classList.add("middleRow");
+        containerGO.appendChild(middleRow);
+
         const inputName = document.createElement("input");
-        inputName.classList.add("inputName");
+        inputName.classList.add("inputGO");
         inputName.hidden = true;
-        this.mainDiv.appendChild(inputName);
+        middleRow.appendChild(inputName);
 
         const enterName = document.createElement("button");
-        enterName.classList.add("enterName");
+        enterName.classList.add("buttonIGO");
         enterName.hidden = true;
         enterName.innerHTML = "Enter";
-        this.mainDiv.appendChild(enterName);
+        middleRow.appendChild(enterName);
 
         if(found){
             inputName.hidden = false;
             enterName.hidden = false;
         }
 
+        const bottomRow = document.createElement("div");
+        bottomRow.classList.add("buttonsGrid");
+        containerGO.appendChild(bottomRow);
+
         const home = document.createElement("button");
-        home.classList.add("home");
+        home.classList.add("buttonGO");
         home.innerHTML = "Home";
-        this.mainDiv.appendChild(home);
+        bottomRow.appendChild(home);
 
         const anotherRound = document.createElement("button");
-        anotherRound.classList.add("anotherRound");
+        anotherRound.classList.add("buttonGO");
         anotherRound.innerHTML = "Another Round";
-        this.mainDiv.appendChild(anotherRound);
+        bottomRow.appendChild(anotherRound);
 
         this.clickSub = this.click$.pipe(
             filter(event => event.target instanceof HTMLButtonElement),
@@ -300,13 +336,18 @@ export class Game{
             }
         }
 
+        const container = document.createElement("div");
+        container.classList.add("containerSB");
+        this.mainDiv.appendChild(container);
+
         const title = document.createElement("p");
+        title.classList.add("titleTable");
         title.innerHTML = "Quiz";
-        this.mainDiv.appendChild(title);
+        container.appendChild(title);
         
         const board = document.createElement("table");
         board.classList.add("board");
-        this.mainDiv.appendChild(board);
+        container.appendChild(board);
 
         const boardHead = document.createElement("thead");
         boardHead.classList.add("boardHead");
@@ -340,33 +381,31 @@ export class Game{
             boardBody.appendChild(row);
         });
 
-        const breakLine = document.createElement("br");
-        this.mainDiv.appendChild(breakLine);
-
         const titleQP = document.createElement("p");
         titleQP.innerHTML = "Quickest Player";
-        this.mainDiv.appendChild(titleQP);
+        titleQP.classList.add("titleTable");
+        container.appendChild(titleQP);
         
         const boardQP = document.createElement("table");
-        boardQP.classList.add("boardQP");
-        this.mainDiv.appendChild(boardQP);
+        boardQP.classList.add("board");
+        container.appendChild(boardQP);
 
         const boardHeadQP = document.createElement("thead");
-        boardHeadQP.classList.add("boardHeadQP");
+        boardHeadQP.classList.add("boardHead");
         boardQP.appendChild(boardHeadQP);
 
         const nameHeadQP = document.createElement("th");
-        nameHeadQP.classList.add("nameHeadQP");
+        nameHeadQP.classList.add("nameHead");
         nameHeadQP.innerHTML = "Name";
         boardHeadQP.appendChild(nameHeadQP);
 
         const scoreHeadQP = document.createElement("th");
-        scoreHeadQP.classList.add("scoreHeadQP");
+        scoreHeadQP.classList.add("scoreHead");
         scoreHeadQP.innerHTML = "Score";
         boardHeadQP.appendChild(scoreHeadQP);
 
         const boardBodyQP = document.createElement("tbody");
-        boardBodyQP.classList.add("tbodyQP");
+        boardBodyQP.classList.add("tbody");
         boardQP.appendChild(boardBodyQP);
 
         scoreboardQP.forEach(score => {
@@ -384,34 +423,36 @@ export class Game{
         });
 
         const dare = document.createElement("p");
+        dare.classList.add("dare");
         dare.innerHTML = "I bet you can't finish in all of them times combined: "
         +scoreboardQP.reduce((acc, scoreboard)=>acc + scoreboard.score, 0)+"s";
-        this.mainDiv.appendChild(dare);
+        container.appendChild(dare);
 
         const titleLR = document.createElement("p");
         titleLR.innerHTML = "Lightning Round";
-        this.mainDiv.appendChild(titleLR);
+        titleLR.classList.add("titleTable");
+        container.appendChild(titleLR);
         
         const boardLR = document.createElement("table");
-        boardLR.classList.add("boardLR");
-        this.mainDiv.appendChild(boardLR);
+        boardLR.classList.add("board");
+        container.appendChild(boardLR);
 
         const boardHeadLR = document.createElement("thead");
-        boardHeadLR.classList.add("boardHeadLR");
+        boardHeadLR.classList.add("boardHead");
         boardLR.appendChild(boardHeadLR);
 
         const nameHeadLR = document.createElement("th");
-        nameHeadLR.classList.add("nameHeadLR");
+        nameHeadLR.classList.add("nameHead");
         nameHeadLR.innerHTML = "Name";
         boardHeadLR.appendChild(nameHeadLR);
 
         const scoreHeadLR = document.createElement("th");
-        scoreHeadLR.classList.add("scoreHeadLR");
+        scoreHeadLR.classList.add("scoreHead");
         scoreHeadLR.innerHTML = "Score";
         boardHeadLR.appendChild(scoreHeadLR);
 
         const boardBodyLR = document.createElement("tbody");
-        boardBodyLR.classList.add("tbodyLR");
+        boardBodyLR.classList.add("tbody");
         boardLR.appendChild(boardBodyLR);
 
         scoreboardLR.forEach(score => {
@@ -429,9 +470,9 @@ export class Game{
         });
 
         const home = document.createElement("button");
-        home.classList.add("home");
+        home.classList.add("buttonH");
         home.innerHTML = "Home";
-        this.mainDiv.appendChild(home);
+        container.appendChild(home);
 
         this.clickSub = this.click$.pipe(
             filter(event => event.target instanceof HTMLButtonElement),
@@ -448,35 +489,45 @@ export class Game{
         let lastAnswer = "";
         let score = 0;
 
+        const container = document.createElement("div");
+        container.classList.add("container");
+        this.mainDiv.appendChild(container);
+
         const question = document.createElement("p");
         question.hidden = true;
         question.classList.add("question");
-        this.mainDiv.appendChild(question);
+        container.appendChild(question);
 
         const go = document.createElement("button");
-        go.classList.add('go');
+        go.classList.add('buttonH');
         go.innerHTML = "Go!"
-        this.mainDiv.appendChild(go);
+        container.appendChild(go);
+
+        const buttonsGrid = document.createElement("div");
+        buttonsGrid.classList.add("buttonsGrid");
+        container.append(buttonsGrid);
 
         const answer_1 = document.createElement("button");
         answer_1.hidden = true;
-        answer_1.classList.add("answer_1");
-        this.mainDiv.appendChild(answer_1);
+        answer_1.classList.add("buttonH");
+        buttonsGrid.appendChild(answer_1);
 
         const answer_2 = document.createElement("button");
         answer_2.hidden = true;
-        answer_2.classList.add("answer_2");
-        this.mainDiv.appendChild(answer_2);
+        answer_2.classList.add("buttonH");
+        buttonsGrid.appendChild(answer_2);
 
         const answer_3 = document.createElement("button");
         answer_3.hidden = true;
-        answer_3.classList.add("answer_3");
-        this.mainDiv.appendChild(answer_3);
+        answer_3.classList.add("buttonH");
+        buttonsGrid.appendChild(answer_3);
 
         const answer_4 = document.createElement("button");
         answer_4.hidden = true;
-        answer_4.classList.add("answer_4");
-        this.mainDiv.appendChild(answer_4);
+        answer_4.classList.add("buttonH");
+        buttonsGrid.appendChild(answer_4);
+
+        question.style.maxWidth = String(buttonsGrid.offsetWidth) + 'px';
 
         const response = await fetch("src/data/questions.json");
         this.questions = await response.json();
@@ -523,6 +574,7 @@ export class Game{
                     answer_2.innerHTML = this.questions[i].answers[0];
                     answer_3.innerHTML = this.questions[i].answers[1];
                     answer_4.innerHTML = this.questions[i].answers[2];
+                    question.style.maxWidth = String(buttonsGrid.offsetWidth) + 'px';
                     console.log((new Date()).getSeconds());
                     const lastQuestion = this.questions.splice(i, 1);
                     lastAnswer = lastQuestion[0].correct_answer;
@@ -537,10 +589,14 @@ export class Game{
     async CreateLRGameOver(score: number) {
         this.Clear();
 
+        const containerGO = document.createElement("div");
+        containerGO.classList.add("containerGO");
+        this.mainDiv.appendChild(containerGO);
+
         const scoreText = document.createElement("p");
-        scoreText.classList.add("scoreText");
+        scoreText.classList.add("pointsText");
         scoreText.innerHTML = "You answered correctly "+ String(score) + " questions";
-        this.mainDiv.appendChild(scoreText);
+        containerGO.appendChild(scoreText);
 
         // Ako je ostvario dovoljno poena unesi ime za Scoreboard
 
@@ -559,31 +615,39 @@ export class Game{
             }
         }
 
+        const middleRow = document.createElement("div");
+        middleRow.classList.add("middleRow");
+        containerGO.appendChild(middleRow);
+
         const inputName = document.createElement("input");
-        inputName.classList.add("inputName");
+        inputName.classList.add("inputGO");
         inputName.hidden = true;
-        this.mainDiv.appendChild(inputName);
+        middleRow.appendChild(inputName);
 
         const enterName = document.createElement("button");
-        enterName.classList.add("enterName");
+        enterName.classList.add("buttonIGO");
         enterName.hidden = true;
         enterName.innerHTML = "Enter";
-        this.mainDiv.appendChild(enterName);
+        middleRow.appendChild(enterName);
 
         if(found){
             inputName.hidden = false;
             enterName.hidden = false;
         }
 
+        const bottomRow = document.createElement("div");
+        bottomRow.classList.add("buttonsGrid");
+        containerGO.appendChild(bottomRow);
+
         const home = document.createElement("button");
-        home.classList.add("home");
+        home.classList.add("buttonGO");
         home.innerHTML = "Home";
-        this.mainDiv.appendChild(home);
+        bottomRow.appendChild(home);
 
         const anotherRound = document.createElement("button");
-        anotherRound.classList.add("anotherRound");
+        anotherRound.classList.add("buttonGO");
         anotherRound.innerHTML = "Another Round";
-        this.mainDiv.appendChild(anotherRound);
+        bottomRow.appendChild(anotherRound);
 
         this.clickSub = this.click$.pipe(
             filter(event => event.target instanceof HTMLButtonElement),
@@ -624,35 +688,45 @@ export class Game{
     async CreateQuickestPlayer() {
         this.Clear();
 
+        const container = document.createElement("div");
+        container.classList.add("container");
+        this.mainDiv.appendChild(container);
+
         const go = document.createElement("button");
-        go.classList.add('go');
+        go.classList.add('buttonH');
         go.innerHTML = "Go!"
-        this.mainDiv.appendChild(go);
+        container.appendChild(go);
 
         const question = document.createElement("p");
         question.hidden = true;
         question.classList.add("question");
-        this.mainDiv.appendChild(question);
+        container.appendChild(question);
+
+        const buttonsGrid = document.createElement("div");
+        buttonsGrid.classList.add("buttonsGrid");
+        container.append(buttonsGrid);
 
         const answer_1 = document.createElement("button");
         answer_1.hidden = true;
-        answer_1.classList.add("answer_1");
-        this.mainDiv.appendChild(answer_1);
+        answer_1.classList.add("buttonH");
+        buttonsGrid.appendChild(answer_1);
 
         const answer_2 = document.createElement("button");
         answer_2.hidden = true;
-        answer_2.classList.add("answer_2");
-        this.mainDiv.appendChild(answer_2);
+        answer_2.classList.add("buttonH");
+        buttonsGrid.appendChild(answer_2);
 
         const answer_3 = document.createElement("button");
         answer_3.hidden = true;
-        answer_3.classList.add("answer_3");
-        this.mainDiv.appendChild(answer_3);
+        answer_3.classList.add("buttonH");
+        buttonsGrid.appendChild(answer_3);
 
         const answer_4 = document.createElement("button");
         answer_4.hidden = true;
-        answer_4.classList.add("answer_4");
-        this.mainDiv.appendChild(answer_4);
+        answer_4.classList.add("buttonH");
+        buttonsGrid.appendChild(answer_4);
+
+        question.style.maxWidth = String(buttonsGrid.offsetWidth) + 'px';
 
         const response = await fetch("src/data/questions.json");
         this.questions = await response.json();
@@ -697,6 +771,7 @@ export class Game{
                 answer_2.innerHTML = this.questions[i].answers[0];
                 answer_3.innerHTML = this.questions[i].answers[1];
                 answer_4.innerHTML = this.questions[i].answers[2];
+                question.style.maxWidth = String(buttonsGrid.offsetWidth) + 'px';
                 const lastQuestion = this.questions.splice(i, 1);
                     lastAnswer = lastQuestion[0].correct_answer;
                     lastEvent = event;
@@ -734,13 +809,17 @@ export class Game{
     async CreateQPGameOver(time: number, finished: boolean) {
         this.Clear();
 
+        const containerGO = document.createElement("div");
+        containerGO.classList.add("containerGO");
+        this.mainDiv.appendChild(containerGO);
+
         const scoreText = document.createElement("p");
-        scoreText.classList.add("scoreText");
+        scoreText.classList.add("pointsText");
         if(finished)
             scoreText.innerHTML = "Congratulations! You finished in "+ String(time)+ " seconds";
         else
-            scoreText.innerHTML = "You failed bitch ass nigga!";
-        this.mainDiv.appendChild(scoreText);
+            scoreText.innerHTML = "You failed miserably!";
+        containerGO.appendChild(scoreText);
 
         // Ako je ostvario dovoljno poena unesi ime za Scoreboard
         const response = await fetch("src/data/scoreboard.json");
@@ -758,31 +837,39 @@ export class Game{
             }
         }
 
+        const middleRow = document.createElement("div");
+        middleRow.classList.add("middleRow");
+        containerGO.appendChild(middleRow);
+
         const inputName = document.createElement("input");
-        inputName.classList.add("inputName");
+        inputName.classList.add("inputGO");
         inputName.hidden = true;
-        this.mainDiv.appendChild(inputName);
+        middleRow.appendChild(inputName);
 
         const enterName = document.createElement("button");
-        enterName.classList.add("enterName");
+        enterName.classList.add("buttonIGO");
         enterName.hidden = true;
         enterName.innerHTML = "Enter";
-        this.mainDiv.appendChild(enterName);
+        middleRow.appendChild(enterName);
 
-        if(found){
+        if(found && scoreText.innerHTML !== "You failed miserably!"){
             inputName.hidden = false;
             enterName.hidden = false;
         }
 
+        const bottomRow = document.createElement("div");
+        bottomRow.classList.add("buttonsGrid");
+        containerGO.appendChild(bottomRow);
+
         const home = document.createElement("button");
-        home.classList.add("home");
+        home.classList.add("buttonGO");
         home.innerHTML = "Home";
-        this.mainDiv.appendChild(home);
+        bottomRow.appendChild(home);
 
         const anotherRound = document.createElement("button");
-        anotherRound.classList.add("anotherRound");
+        anotherRound.classList.add("buttonGO");
         anotherRound.innerHTML = "Another Round";
-        this.mainDiv.appendChild(anotherRound);
+        bottomRow.appendChild(anotherRound);
 
         this.clickSub = this.click$.pipe(
             filter(event => event.target instanceof HTMLButtonElement),
@@ -832,6 +919,10 @@ export class Game{
     async CreateRandomNameGenerator(){
         this.Clear();
 
+        const container = document.createElement("div");
+        container.classList.add("containerNG");
+        this.mainDiv.appendChild(container);
+
         let response = await fetch("src/data/first.json");
         let first: Name[] = await response.json();
         first = this.shuffleArray(first);
@@ -850,17 +941,25 @@ export class Game{
                 for(i;i<first.length;i++){
                     const name = document.createElement("p");
                     name.innerHTML = value.f[i].name + " " + value.l[i].name;
-                    this.mainDiv.appendChild(name);
+                    name.classList.add("name");
+                    container.appendChild(name);
                 }
             },
             complete: ()=>{
+
+                const buttonsGrid = document.createElement("div");
+                buttonsGrid.classList.add("buttonsGridNG");
+                container.append(buttonsGrid);
+
                 const onceAgain = document.createElement("button");
+                onceAgain.classList.add("buttonH");
                 onceAgain.innerHTML = "Generate";
-                this.mainDiv.append(onceAgain);
+                buttonsGrid.append(onceAgain);
         
                 const home = document.createElement("button");
+                home.classList.add("buttonH");
                 home.innerHTML = "Home";
-                this.mainDiv.append(home);
+                buttonsGrid.append(home);
             }
         })
 
